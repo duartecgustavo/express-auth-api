@@ -1,7 +1,8 @@
 import dotenv from "dotenv";
-import express, { Request, Response } from "express";
+import express, { Request, Response, NextFunction } from "express";
 import "reflect-metadata";
 import cors from "cors";
+import helmet from "helmet";
 import { authRoutes } from "./routes/auth";
 import { userRoutes } from "./routes/users";
 
@@ -9,23 +10,44 @@ dotenv.config();
 
 const app = express();
 
-// ✅ habilita o CORS antes das rotas
+// ===== MIDDLEWARES DE SEGURANÇA =====
+app.use(helmet());
+
 app.use(
   cors({
-    origin: "*", // permite todas as origens — use com cautela
+    origin: process.env.CORS_ORIGIN || "http://localhost:5173",
+    credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
-app.use(express.json());
+app.use(express.json({ limit: "15mb" }));
+app.use(express.urlencoded({ extended: true }));
 
-// rotas
+// ===== ROTAS =====
+app.get("/", (req: Request, res: Response) => {
+  res.json({
+    message: "Welcome to the Auth API",
+    version: "1.0.0",
+    endpoints: {
+      auth: "/auth",
+      users: "/users",
+    },
+  });
+});
+
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
 
-app.get("/", (req: Request, res: Response) => {
-  res.send("Welcome to the User API");
+// ===== TRATAMENTO DE ERROS =====
+
+// Rota não encontrada
+app.use((req: Request, res: Response) => {
+  res.status(404).json({
+    error: "Route not found",
+    path: req.path,
+  });
 });
 
 export { app };
