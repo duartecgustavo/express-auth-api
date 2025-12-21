@@ -1,36 +1,67 @@
-import jsonwebtoken from "jsonwebtoken";
-import { NextFunction, Response } from "express";
-import { JwtPayload } from "jsonwebtoken";
-import { Request } from "express";
+import { NextFunction, Response, Request } from "express";
+import jwt, { JwtPayload } from "jsonwebtoken";
 
-export interface AuthenticatedRequest extends Request {
-  user?: string | JwtPayload;
+export interface TokenPayload extends JwtPayload {
+  userId: string;
+  email: string;
 }
 
-const JWT_SECRET = "teste123";
+export interface AuthenticatedRequest extends Request {
+  user?: TokenPayload;
+}
 
-function authMiddleware(
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  throw new Error("❌ JWT_SECRET is not defined in environment variables");
+}
+
+export function authMiddleware(
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
 ): void {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
+  const authHeader = req.headers.authorization;
 
-  if (!token) {
-    res.status(401).json({ error: "Token obrigatório" });
+  if (!authHeader) {
+    res.status(401).json({ error: "Authorization header missing" });
     return;
   }
 
-  jsonwebtoken.verify(
-    token,
-    JWT_SECRET,
-    (err: Error | null, user: string | JwtPayload | undefined) => {
-      if (err) return res.status(403).json({ error: "Token inválido" });
-      req.user = user;
-      next();
-    }
-  );
-}
+  // Verificar formato "Bearer TOKEN"
+  const parts = authHeader.split(" ");
 
-export { authMiddleware, JWT_SECRET };
+  if (parts.length !== 2 || parts[0] !== "Bearer") {
+    res
+      .status(401)
+      .json({ error: "Invalid token format. Use: Bearer <token>" });
+    return;
+  }
+
+  const token = parts[1];
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET as string);
+
+    if (typeof decoded === "string") {
+      res.status(403).json({ error: "Invalid token payload" });
+      return;
+    }
+
+    req.user = decoded as TokenPayload;
+
+    next();
+  } catch (error) {
+    if (error instanceof jwt.TokenExpiredError) {
+      res.status(401).json({ error: "Token expired" });
+      return;
+    }
+
+    if (error instanceof jwt.JsonWebTokenError) {
+      res.status(403).json({ error: "Invalid token" });
+      return;
+    }
+
+    res.status(500).json({ error: "Token validation failed" });
+  }
+}
