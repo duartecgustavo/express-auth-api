@@ -1,12 +1,12 @@
 import {
   EmailAlreadyInUseError,
   WeakPasswordError,
-} from "../../../domain/errors/UserErrors";
-import { MailService } from "../../../domain/services/MailService";
-import { PasswordService } from "../../../domain/services/PasswordService";
-import { RegisterUserDto } from "../../../dtos/register.dto";
-import { User } from "../../../entities/User";
-import { IUserRepository } from "../../../repositories/IUserRepository";
+} from "../../domain/errors/RegisterErrors.errors";
+import { MailService } from "../../domain/services/MailService.service";
+import { PasswordService } from "../../domain/services/PasswordService.service";
+import { RegisterUserDto } from "../../dtos/register.dto";
+import { User } from "../../entities/User";
+import { IUserRepository } from "../../repositories/IUserRepository";
 
 export class RegisterUserUC {
   constructor(

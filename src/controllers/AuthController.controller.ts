@@ -1,18 +1,22 @@
-import bcrypt from "bcryptjs";
 import { Request, Response } from "express";
-import jwt from "jsonwebtoken";
-import { AppDataSource } from "../data-source";
-import { User } from "../entities/User";
-import { userService } from "../services/userService";
-import { RegisterUserUC } from "./application/use-cases/RegisterUser.useCase";
+import { LoginUserUC } from "../application/use-cases/LoginUser.useCase";
+import { RegisterUserUC } from "../application/use-cases/RegisterUser.useCase";
 import {
   EmailAlreadyInUseError,
   WeakPasswordError,
-} from "../domain/errors/UserErrors";
+} from "../domain/errors/RegisterErrors.errors";
+import {
+  InvalidCredentialsError,
+  UserNotConfirmedError,
+} from "../domain/errors/UserError.errors";
+import { userService } from "../services/userService";
 
 // New Controller
 export class UserController {
-  constructor(private readonly registerUserUC: RegisterUserUC) {}
+  constructor(
+    private readonly registerUserUC: RegisterUserUC,
+    private readonly loginUserUC: LoginUserUC
+  ) {}
 
   async register(req: Request, res: Response): Promise<void> {
     try {
@@ -21,6 +25,19 @@ export class UserController {
       res.status(201).json({
         message: "Usuário criado com sucesso",
         user,
+      });
+    } catch (error) {
+      this.handleError(error, res);
+    }
+  }
+
+  async login(req: Request, res: Response): Promise<void> {
+    try {
+      const result = await this.loginUserUC.execute(req.body);
+
+      res.status(200).json({
+        message: "Login realizado com sucesso!",
+        ...result,
       });
     } catch (error) {
       this.handleError(error, res);
@@ -38,6 +55,21 @@ export class UserController {
         error: error.message,
         details: error.errors,
       });
+      return;
+    }
+
+    if (error instanceof InvalidCredentialsError) {
+      res.status(401).json({
+        error: error.message,
+      });
+      return;
+    }
+
+    if (error instanceof UserNotConfirmedError) {
+      res.status(403).json({
+        error: error.message,
+        code: "EMAIL_NOT_CONFIRMED",
+      });
     }
 
     console.error("❌ Unexpected error:", error);
@@ -46,32 +78,6 @@ export class UserController {
     });
   }
 }
-
-const JWT_SECRET = "teste123";
-
-// ===== Métodos de autenticação =====
-
-const loginUsers = async (req: Request, res: Response) => {
-  const { email, password } = req.body;
-
-  if (!email || !password) {
-    return res.status(400).json({ error: "Email e senha são obrigatórios" });
-  }
-
-  const userRepository = AppDataSource.getRepository(User);
-  const user = await userRepository.findOne({ where: { email } });
-  if (!user) return res.status(400).json({ error: "Usuário não encontrado" });
-
-  const isPasswordValid = await bcrypt.compare(password, user.password);
-  if (!isPasswordValid)
-    return res.status(400).json({ error: "Senha incorreta" });
-
-  const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, {
-    expiresIn: "1h",
-  });
-
-  res.json({ message: "Login realizado com sucesso!", token });
-};
 
 // ===== Métodos gerais =====
 
@@ -163,4 +169,4 @@ const deleteUser = async (req: Request, res: Response) => {
   }
 };
 
-export { deleteUser, getUserById, getUsers, loginUsers, updateUser };
+export { deleteUser, getUserById, getUsers, updateUser };

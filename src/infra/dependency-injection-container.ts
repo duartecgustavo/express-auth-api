@@ -1,7 +1,9 @@
-import { RegisterUserUC } from "../controllers/application/use-cases/RegisterUser.useCase";
-import { UserController } from "../controllers/userController";
-import { MailService } from "../domain/services/MailService";
-import { PasswordService } from "../domain/services/PasswordService";
+import { LoginUserUC } from "../application/use-cases/LoginUser.useCase";
+import { RegisterUserUC } from "../application/use-cases/RegisterUser.useCase";
+import { UserController } from "../controllers/AuthController.controller";
+import { MailService } from "../domain/services/MailService.service";
+import { PasswordService } from "../domain/services/PasswordService.service";
+import { TokenService } from "../domain/services/TokenService.service";
 import { TypeORMUserRepository } from "../repositories/TypeORMUserRepository";
 
 // Repository
@@ -10,6 +12,7 @@ const userRepository = new TypeORMUserRepository();
 // Services
 const passwordService = new PasswordService();
 const mailService = new MailService();
+const tokenService = new TokenService();
 
 // Use Cases
 const registerUserUC = new RegisterUserUC(
@@ -18,4 +21,11 @@ const registerUserUC = new RegisterUserUC(
   mailService
 );
 
-export const userController = new UserController(registerUserUC);
+const loginUserUC = new LoginUserUC(
+  userRepository,
+  passwordService,
+  mailService,
+  tokenService
+);
+
+export const authController = new UserController(registerUserUC, loginUserUC);
