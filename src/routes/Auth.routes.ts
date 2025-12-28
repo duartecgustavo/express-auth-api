@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { LoginUserDto } from "../dtos/login.dto";
-import { RegisterUserDto } from "../dtos/register.dto";
-import { authController } from "../infra/dependency-injection-container";
+import { LoginUserDto } from "../application/dtos/login.dto";
+import { RegisterUserDto } from "../application/dtos/register.dto";
+import { authController } from "../controllers/dependency-injection-auth.di";
 import { validateDto } from "../middlewares/validateDto";
 
 const router = Router();

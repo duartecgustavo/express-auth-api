@@ -1,10 +1,10 @@
 import { LoginUserUC } from "../application/use-cases/LoginUser.useCase";
 import { RegisterUserUC } from "../application/use-cases/RegisterUser.useCase";
-import { UserController } from "../controllers/AuthController.controller";
+import { UserController } from "./AuthController.controller";
 import { MailService } from "../domain/services/MailService.service";
 import { PasswordService } from "../domain/services/PasswordService.service";
 import { TokenService } from "../domain/services/TokenService.service";
-import { TypeORMUserRepository } from "../repositories/TypeORMUserRepository";
+import { TypeORMUserRepository } from "../domain/repositories/TypeORMUser.repository";
 
 // Repository
 const userRepository = new TypeORMUserRepository();

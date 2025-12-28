@@ -2,8 +2,8 @@ import { InvalidCredentialsError } from "../../domain/errors/UserError.errors";
 import { MailService } from "../../domain/services/MailService.service";
 import { PasswordService } from "../../domain/services/PasswordService.service";
 import { TokenService } from "../../domain/services/TokenService.service";
-import { LoginUserDto } from "../../dtos/login.dto";
-import { IUserRepository } from "../../repositories/IUserRepository";
+import { LoginUserDto } from "../dtos/login.dto";
+import { DIUser } from "../../domain/repositories/dependency-injection-user.di";
 
 interface ILoginResponse {
   accessToken: string;
@@ -18,7 +18,7 @@ interface ILoginResponse {
 
 export class LoginUserUC {
   constructor(
-    private readonly userRepository: IUserRepository,
+    private readonly userRepository: DIUser,
     private readonly passwordService: PasswordService,
     private readonly mailService: MailService,
     private readonly tokenService: TokenService

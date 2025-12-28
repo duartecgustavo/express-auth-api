@@ -4,13 +4,13 @@ import {
 } from "../../domain/errors/RegisterErrors.errors";
 import { MailService } from "../../domain/services/MailService.service";
 import { PasswordService } from "../../domain/services/PasswordService.service";
-import { RegisterUserDto } from "../../dtos/register.dto";
-import { User } from "../../entities/User";
-import { IUserRepository } from "../../repositories/IUserRepository";
+import { RegisterUserDto } from "../dtos/register.dto";
+import { User } from "../../domain/entities/User";
+import { DIUser } from "../../domain/repositories/dependency-injection-user.di";
 
 export class RegisterUserUC {
   constructor(
-    private readonly userRepository: IUserRepository,
+    private readonly userRepository: DIUser,
     private readonly passWordService: PasswordService,
     private readonly emailService: MailService
   ) {}

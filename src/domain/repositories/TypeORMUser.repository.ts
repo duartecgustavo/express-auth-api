@@ -1,9 +1,9 @@
 import { Repository } from "typeorm";
-import { AppDataSource } from "../data-source";
+import { AppDataSource } from "../../data-source";
 import { User } from "../entities/User";
-import { IUserRepository } from "./IUserRepository";
+import { DIUser } from "./dependency-injection-user.di";
 
-export class TypeORMUserRepository implements IUserRepository {
+export class TypeORMUserRepository implements DIUser {
   private repository: Repository<User>;
 
   constructor() {
