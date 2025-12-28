@@ -1,7 +1,5 @@
 import { AppDataSource } from "../data-source";
 import { User } from "../entities/User";
-import bcrypt from "bcryptjs";
-
 
 class UserService {
   private userRepository = AppDataSource.getRepository(User);
@@ -41,42 +39,6 @@ class UserService {
 
     const { password, ...userWithoutPass } = user;
     return { user: userWithoutPass };
-  }
-
-  async registerUser(email: string, password: string, name: string) {
-    if (!email || !password || !name) {
-      return {
-        error:
-          "Todos os campos são obrigatórios: email, password, confirmationCode",
-      };
-    }
-
-    const userRepository = AppDataSource.getRepository(User);
-
-    const existingUser = await userRepository.findOne({ where: { email } });
-    if (existingUser) {
-      return {
-        error: "Email já está em uso",
-      };
-    }
-
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const newUser = userRepository.create({
-      email,
-      password: hashedPassword,
-      name,
-      isConfirmed: false,
-    });
-
-    await userRepository.save(newUser);
-    const { password: _, ...userResponse } = newUser;
-
-    return {
-      message: "Usuário criado com sucesso",
-      user: userResponse,
-    };
   }
 
   async updateUser(email: string, password: string, userId: number) {

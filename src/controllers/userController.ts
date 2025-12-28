@@ -51,28 +51,6 @@ const JWT_SECRET = "teste123";
 
 // ===== Métodos de autenticação =====
 
-const registerUsers = async (req: Request, res: Response) => {
-  try {
-    const { email, password, name } = req.body;
-
-    const result = await userService.registerUser(email, password, name);
-
-    if (result.error) {
-      return res.status(400).json({ error: result.error });
-    }
-
-    res.status(201).json({
-      message: "Usuário criado com sucesso",
-      user: result.user,
-    });
-  } catch (error) {
-    console.error("Erro ao criar usuário:", error);
-    res.status(500).json({
-      error: "Erro interno do servidor",
-    });
-  }
-};
-
 const loginUsers = async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
@@ -185,11 +163,4 @@ const deleteUser = async (req: Request, res: Response) => {
   }
 };
 
-export {
-  deleteUser,
-  getUserById,
-  getUsers,
-  loginUsers,
-  registerUsers,
-  updateUser,
-};
+export { deleteUser, getUserById, getUsers, loginUsers, updateUser };

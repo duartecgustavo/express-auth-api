@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { loginUsers, registerUsers } from "../controllers/userController";
+import { loginUsers } from "../controllers/userController";
 import { RegisterUserDto } from "../dtos/register.dto";
 import { userController } from "../infra/dependency-injection-container";
 import { validateDto } from "../middlewares/validateDto";
@@ -10,7 +10,6 @@ router.post("/register", validateDto(RegisterUserDto), (req, res) =>
   userController.register(req, res)
 );
 
-router.post("/registerUser", registerUsers);
 router.post("/loginUser", loginUsers);
 
 export { router as authRoutes };
