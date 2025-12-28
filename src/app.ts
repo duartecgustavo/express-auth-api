@@ -1,8 +1,8 @@
-import dotenv from "dotenv";
-import express, { Request, Response, NextFunction } from "express";
-import "reflect-metadata";
 import cors from "cors";
+import dotenv from "dotenv";
+import express, { Request, Response } from "express";
 import helmet from "helmet";
+import "reflect-metadata";
 import { authRoutes } from "./routes/auth";
 import { userRoutes } from "./routes/users";
 

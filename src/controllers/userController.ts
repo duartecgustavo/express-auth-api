@@ -1,53 +1,55 @@
-import { Request, Response } from "express";
-import { AppDataSource } from "../data-source";
-import { userService } from "../services/userService";
-import { User } from "../entities/User";
 import bcrypt from "bcryptjs";
+import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
+import { AppDataSource } from "../data-source";
+import { User } from "../entities/User";
+import { userService } from "../services/userService";
+import { RegisterUserUC } from "./application/use-cases/RegisterUser.useCase";
+import {
+  EmailAlreadyInUseError,
+  WeakPasswordError,
+} from "../domain/errors/UserErrors";
 
-const JWT_SECRET = "teste123";
+// New Controller
+export class UserController {
+  constructor(private readonly registerUserUC: RegisterUserUC) {}
 
-const findAllUsers = async (req: Request, res: Response) => {
-  try {
-    const { users, total } = await userService.findAllUsers();
+  async register(req: Request, res: Response): Promise<void> {
+    try {
+      const user = await this.registerUserUC.execute(req.body);
 
-    res.status(200).json({
-      message: "Lista de usuários recuperada com sucesso",
-      users: users,
-      total: total,
-    });
-  } catch (error) {
-    console.error("Erro ao buscar usuários:", error);
-    res.status(500).json({
-      error: "Erro interno do servidor",
-    });
+      res.status(201).json({
+        message: "Usuário criado com sucesso",
+        user,
+      });
+    } catch (error) {
+      this.handleError(error, res);
+    }
   }
-};
 
-const getUserById = async (req: Request, res: Response) => {
-  try {
-    console.log("ID do usuário solicitado:", req.params.id);
-    const result = await userService.findUserById(parseInt(req.params.id));
+  private handleError(error: unknown, res: Response): void {
+    if (error instanceof EmailAlreadyInUseError) {
+      res.status(409).json({ error: error.message });
+      return;
+    }
 
-    if (!result) {
-      return res.status(404).json({
-        error: "Usuário não encontrado",
+    if (error instanceof WeakPasswordError) {
+      res.status(400).json({
+        error: error.message,
+        details: error.errors,
       });
     }
 
-    const { user } = result;
-
-    return res.status(200).json({
-      message: "Usuário encontrado com sucesso",
-      user,
-    });
-  } catch (error) {
-    console.error("Erro ao buscar usuário:", error);
+    console.error("❌ Unexpected error:", error);
     res.status(500).json({
-      error: "Erro interno do servidor",
+      error: "Erro interno no servidor",
     });
   }
-};
+}
+
+const JWT_SECRET = "teste123";
+
+// ===== Métodos de autenticação =====
 
 const registerUsers = async (req: Request, res: Response) => {
   try {
@@ -93,6 +95,50 @@ const loginUsers = async (req: Request, res: Response) => {
   res.json({ message: "Login realizado com sucesso!", token });
 };
 
+// ===== Métodos gerais =====
+
+const getUsers = async (req: Request, res: Response) => {
+  try {
+    const { users, total } = await userService.findAllUsers();
+
+    res.status(200).json({
+      message: "Lista de usuários recuperada com sucesso",
+      users: users,
+      total: total,
+    });
+  } catch (error) {
+    console.error("Erro ao buscar usuários:", error);
+    res.status(500).json({
+      error: "Erro interno do servidor",
+    });
+  }
+};
+
+const getUserById = async (req: Request, res: Response) => {
+  try {
+    console.log("ID do usuário solicitado:", req.params.id);
+    const result = await userService.findUserById(parseInt(req.params.id));
+
+    if (!result) {
+      return res.status(404).json({
+        error: "Usuário não encontrado",
+      });
+    }
+
+    const { user } = result;
+
+    return res.status(200).json({
+      message: "Usuário encontrado com sucesso",
+      user,
+    });
+  } catch (error) {
+    console.error("Erro ao buscar usuário:", error);
+    res.status(500).json({
+      error: "Erro interno do servidor",
+    });
+  }
+};
+
 const updateUser = async (req: Request, res: Response) => {
   try {
     const userId = parseInt(req.params.id);
@@ -118,7 +164,7 @@ const updateUser = async (req: Request, res: Response) => {
   }
 };
 
-const removeUser = async (req: Request, res: Response) => {
+const deleteUser = async (req: Request, res: Response) => {
   const userId = parseInt(req.params.id);
 
   try {
@@ -139,4 +185,11 @@ const removeUser = async (req: Request, res: Response) => {
   }
 };
 
-export { findAllUsers, getUserById, registerUsers, loginUsers, updateUser, removeUser };
+export {
+  deleteUser,
+  getUserById,
+  getUsers,
+  loginUsers,
+  registerUsers,
+  updateUser,
+};
