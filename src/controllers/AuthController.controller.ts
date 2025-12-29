@@ -10,12 +10,15 @@ import {
   UserNotConfirmedError,
 } from "../domain/errors/UserError.errors";
 import { userService } from "../services/userService";
+import { promises } from "dns";
+import { GetUsersUC } from "../application/use-cases/GetUsers.useCase";
 
 // New Controller
 export class UserController {
   constructor(
     private readonly registerUserUC: RegisterUserUC,
-    private readonly loginUserUC: LoginUserUC
+    private readonly loginUserUC: LoginUserUC,
+    private readonly getUsersUC: GetUsersUC
   ) {}
 
   async register(req: Request, res: Response): Promise<void> {
@@ -41,6 +44,26 @@ export class UserController {
       });
     } catch (error) {
       this.handleError(error, res);
+    }
+  }
+
+  async getUsers(req: Request, res: Response): Promise<void> {
+    try {
+      const result = await this.getUsersUC.execute(req.query as any);
+
+      res.status(200).json({
+        message: "Usuários listados com sucesso",
+        data: result.users,
+        pagination: {
+          page: result.page,
+          limit: result.limit,
+          total: result.total,
+          totalPages: result.totalPages,
+        },
+      });
+    } catch (error) {
+      console.error("❌ Get users error:", error);
+      res.status(500).json({ error: "Erro ao buscar usuários" });
     }
   }
 

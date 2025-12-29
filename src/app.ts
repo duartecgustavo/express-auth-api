@@ -4,7 +4,7 @@ import express, { Request, Response } from "express";
 import helmet from "helmet";
 import "reflect-metadata";
 import { authRoutes } from "./routes/Auth.routes";
-import { userRoutes } from "./routes/users";
+import { userRoutes } from "./routes/Users.routes";
 
 dotenv.config();
 
