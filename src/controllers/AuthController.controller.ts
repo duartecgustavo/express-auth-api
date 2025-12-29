@@ -1,4 +1,6 @@
 import { Request, Response } from "express";
+import { GetUserByIdUC } from "../application/use-cases/GetUserById.useCase";
+import { GetUsersUC } from "../application/use-cases/GetUsers.useCase";
 import { LoginUserUC } from "../application/use-cases/LoginUser.useCase";
 import { RegisterUserUC } from "../application/use-cases/RegisterUser.useCase";
 import {
@@ -8,17 +10,17 @@ import {
 import {
   InvalidCredentialsError,
   UserNotConfirmedError,
+  UserNotFoundError,
 } from "../domain/errors/UserError.errors";
 import { userService } from "../services/userService";
-import { promises } from "dns";
-import { GetUsersUC } from "../application/use-cases/GetUsers.useCase";
 
 // New Controller
 export class UserController {
   constructor(
     private readonly registerUserUC: RegisterUserUC,
     private readonly loginUserUC: LoginUserUC,
-    private readonly getUsersUC: GetUsersUC
+    private readonly getUsersUC: GetUsersUC,
+    private readonly getUserByIdUC: GetUserByIdUC
   ) {}
 
   async register(req: Request, res: Response): Promise<void> {
@@ -49,7 +51,8 @@ export class UserController {
 
   async getUsers(req: Request, res: Response): Promise<void> {
     try {
-      const result = await this.getUsersUC.execute(req.query as any);
+      const dto = req.validatedQuery || req.query;
+      const result = await this.getUsersUC.execute(dto);
 
       res.status(200).json({
         message: "Usuários listados com sucesso",
@@ -64,6 +67,20 @@ export class UserController {
     } catch (error) {
       console.error("❌ Get users error:", error);
       res.status(500).json({ error: "Erro ao buscar usuários" });
+    }
+  }
+
+  async getUserById(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const user = await this.getUserByIdUC.execute(id);
+
+      res.status(200).json({
+        message: "Usuário encontrado com sucesso",
+        user,
+      });
+    } catch (error) {
+      this.handleError(error, res);
     }
   }
 
@@ -93,6 +110,14 @@ export class UserController {
         error: error.message,
         code: "EMAIL_NOT_CONFIRMED",
       });
+      return;
+    }
+
+    if (error instanceof UserNotFoundError) {
+      res.status(404).json({
+        error: error.message,
+      });
+      return;
     }
 
     console.error("❌ Unexpected error:", error);
@@ -101,25 +126,6 @@ export class UserController {
     });
   }
 }
-
-// ===== Métodos gerais =====
-
-const getUsers = async (req: Request, res: Response) => {
-  try {
-    const { users, total } = await userService.findAllUsers();
-
-    res.status(200).json({
-      message: "Lista de usuários recuperada com sucesso",
-      users: users,
-      total: total,
-    });
-  } catch (error) {
-    console.error("Erro ao buscar usuários:", error);
-    res.status(500).json({
-      error: "Erro interno do servidor",
-    });
-  }
-};
 
 const getUserById = async (req: Request, res: Response) => {
   try {
@@ -192,4 +198,4 @@ const deleteUser = async (req: Request, res: Response) => {
   }
 };
 
-export { deleteUser, getUserById, getUsers, updateUser };
+export { deleteUser, getUserById, updateUser };

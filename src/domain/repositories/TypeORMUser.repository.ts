@@ -41,7 +41,6 @@ export class TypeORMUserRepository implements DIUser {
 
     const skip = (page - 1) * limit;
 
-    // ✅ Opção 1: Usar find() com where
     const whereCondition = search ? [{ name: search }, { email: search }] : {};
 
     const [users, total] = await this.repository.findAndCount({

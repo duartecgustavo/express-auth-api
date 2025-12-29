@@ -1,3 +1,4 @@
+import { GetUserByIdUC } from "../application/use-cases/GetUserById.useCase";
 import { GetUsersUC } from "../application/use-cases/GetUsers.useCase";
 import { LoginUserUC } from "../application/use-cases/LoginUser.useCase";
 import { RegisterUserUC } from "../application/use-cases/RegisterUser.useCase";
@@ -30,9 +31,11 @@ const loginUserUC = new LoginUserUC(
 );
 
 const getUsersUC = new GetUsersUC(userRepository);
+const getUserByIdUC = new GetUserByIdUC(userRepository);
 
 export const authController = new UserController(
   registerUserUC,
   loginUserUC,
-  getUsersUC
+  getUsersUC,
+  getUserByIdUC
 );

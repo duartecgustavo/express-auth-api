@@ -1,15 +1,12 @@
 import { Router } from "express";
 import {
-  getUsers,
-  getUserById,
   deleteUser,
+  getUserById,
   updateUser,
 } from "../controllers/AuthController.controller";
 import { authMiddleware } from "../middlewares/auth";
 
 const router = Router();
-
-router.get("/getAll", authMiddleware, getUsers);
 
 router.get("/getUserById/:id", authMiddleware, getUserById);
 
