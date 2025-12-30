@@ -1,16 +1,8 @@
 import { Router } from "express";
-import {
-  deleteUser,
-  getUserById,
-  updateUser,
-} from "../controllers/AuthController.controller";
+import { deleteUser } from "../controllers/AuthController.controller";
 import { authMiddleware } from "../middlewares/auth";
 
 const router = Router();
-
-router.get("/getUserById/:id", authMiddleware, getUserById);
-
-router.put("/updateUser/:id", authMiddleware, updateUser);
 
 router.delete("/removeUser/:id", authMiddleware, deleteUser);
 

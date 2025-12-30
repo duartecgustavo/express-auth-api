@@ -3,6 +3,7 @@ import { GetUserByIdUC } from "../application/use-cases/GetUserById.useCase";
 import { GetUsersUC } from "../application/use-cases/GetUsers.useCase";
 import { LoginUserUC } from "../application/use-cases/LoginUser.useCase";
 import { RegisterUserUC } from "../application/use-cases/RegisterUser.useCase";
+import { UpdateUserUC } from "../application/use-cases/UpdateUserById.useCase";
 import {
   EmailAlreadyInUseError,
   WeakPasswordError,
@@ -20,7 +21,8 @@ export class UserController {
     private readonly registerUserUC: RegisterUserUC,
     private readonly loginUserUC: LoginUserUC,
     private readonly getUsersUC: GetUsersUC,
-    private readonly getUserByIdUC: GetUserByIdUC
+    private readonly getUserByIdUC: GetUserByIdUC,
+    private readonly updateUserUC: UpdateUserUC
   ) {}
 
   async register(req: Request, res: Response): Promise<void> {
@@ -84,6 +86,27 @@ export class UserController {
     }
   }
 
+  async updateUser(req: Request, res: Response): Promise<void> {
+    try {
+      const id = parseInt(req.params.id, 10);
+
+      if (isNaN(id)) {
+        res.status(400).json({ error: "ID inválido. Deve ser um número" });
+        return;
+      }
+
+      const dto = req.validatedBody || req.body;
+      const user = await this.updateUserUC.execute(String(id), dto);
+
+      res.status(200).json({
+        message: "Usuário atualizado com sucesso!",
+        user,
+      });
+    } catch (error) {
+      this.handleError(error, res);
+    }
+  }
+
   private handleError(error: unknown, res: Response): void {
     if (error instanceof EmailAlreadyInUseError) {
       res.status(409).json({ error: error.message });
@@ -127,56 +150,6 @@ export class UserController {
   }
 }
 
-const getUserById = async (req: Request, res: Response) => {
-  try {
-    console.log("ID do usuário solicitado:", req.params.id);
-    const result = await userService.findUserById(parseInt(req.params.id));
-
-    if (!result) {
-      return res.status(404).json({
-        error: "Usuário não encontrado",
-      });
-    }
-
-    const { user } = result;
-
-    return res.status(200).json({
-      message: "Usuário encontrado com sucesso",
-      user,
-    });
-  } catch (error) {
-    console.error("Erro ao buscar usuário:", error);
-    res.status(500).json({
-      error: "Erro interno do servidor",
-    });
-  }
-};
-
-const updateUser = async (req: Request, res: Response) => {
-  try {
-    const userId = parseInt(req.params.id);
-    const { email, password } = req.body;
-
-    const result = await userService.updateUser(email, password, userId);
-
-    if (result.error) {
-      return res.status(404).json({ error: result.error });
-    }
-
-    const { user: userResponse } = result;
-
-    res.status(200).json({
-      message: "Usuário atualizado com sucesso",
-      user: userResponse,
-    });
-  } catch (error) {
-    console.error("Erro ao atualizar usuário:", error);
-    res.status(500).json({
-      error: "Erro interno do servidor",
-    });
-  }
-};
-
 const deleteUser = async (req: Request, res: Response) => {
   const userId = parseInt(req.params.id);
 
@@ -198,4 +171,4 @@ const deleteUser = async (req: Request, res: Response) => {
   }
 };
 
-export { deleteUser, getUserById, updateUser };
+export { deleteUser };

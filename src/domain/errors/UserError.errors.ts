@@ -20,3 +20,10 @@ export class UserNotFoundError extends Error {
     this.name = "UserNotFoundError";
   }
 }
+
+export class NoFieldsToUpdateError extends Error {
+  constructor() {
+    super("Nenhum campo informado para atualização");
+    this.name = "NoFieldsToUpdateError";
+  }
+}

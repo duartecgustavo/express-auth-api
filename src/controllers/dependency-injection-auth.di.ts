@@ -2,6 +2,7 @@ import { GetUserByIdUC } from "../application/use-cases/GetUserById.useCase";
 import { GetUsersUC } from "../application/use-cases/GetUsers.useCase";
 import { LoginUserUC } from "../application/use-cases/LoginUser.useCase";
 import { RegisterUserUC } from "../application/use-cases/RegisterUser.useCase";
+import { UpdateUserUC } from "../application/use-cases/UpdateUserById.useCase";
 import { TypeORMUserRepository } from "../domain/repositories/TypeORMUser.repository";
 import { MailService } from "../domain/services/MailService.service";
 import { PasswordService } from "../domain/services/PasswordService.service";
@@ -32,10 +33,16 @@ const loginUserUC = new LoginUserUC(
 
 const getUsersUC = new GetUsersUC(userRepository);
 const getUserByIdUC = new GetUserByIdUC(userRepository);
+const updateUserUC = new UpdateUserUC(
+  userRepository,
+  passwordService,
+  mailService
+);
 
 export const authController = new UserController(
   registerUserUC,
   loginUserUC,
   getUsersUC,
-  getUserByIdUC
+  getUserByIdUC,
+  updateUserUC
 );
