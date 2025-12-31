@@ -1,56 +1,25 @@
 import { Request, Response } from "express";
-import { DeleteUserUC } from "../application/use-cases/DeleteUser.useCase";
-import { GetUserByIdUC } from "../application/use-cases/GetUserById.useCase";
-import { GetUsersUC } from "../application/use-cases/GetUsers.useCase";
-import { LoginUserUC } from "../application/use-cases/LoginUser.useCase";
-import { RegisterUserUC } from "../application/use-cases/RegisterUser.useCase";
-import { UpdateUserUC } from "../application/use-cases/UpdateUserById.useCase";
+import { DeleteUserUC } from "../../../application/use-cases/users/DeleteUser.useCase";
+import { GetUserByIdUC } from "../../../application/use-cases/users/GetUserById.useCase";
+import { GetUsersUC } from "../../../application/use-cases/users/GetUsers.useCase";
+import { UpdateUserUC } from "../../../application/use-cases/users/UpdateUserById.useCase";
 import {
   EmailAlreadyInUseError,
   WeakPasswordError,
-} from "../domain/errors/RegisterErrors.errors";
+} from "../../../domain/errors/auth.errors";
 import {
   InvalidCredentialsError,
   UserNotConfirmedError,
   UserNotFoundError,
-} from "../domain/errors/UserError.errors";
+} from "../../../domain/errors/user.errors";
 
-// New Controller
 export class UserController {
   constructor(
-    private readonly registerUserUC: RegisterUserUC,
-    private readonly loginUserUC: LoginUserUC,
     private readonly getUsersUC: GetUsersUC,
     private readonly getUserByIdUC: GetUserByIdUC,
     private readonly updateUserUC: UpdateUserUC,
     private readonly deleteUserUC: DeleteUserUC
   ) {}
-
-  async register(req: Request, res: Response): Promise<void> {
-    try {
-      const user = await this.registerUserUC.execute(req.body);
-
-      res.status(201).json({
-        message: "Usuário criado com sucesso",
-        user,
-      });
-    } catch (error) {
-      this.handleError(error, res);
-    }
-  }
-
-  async login(req: Request, res: Response): Promise<void> {
-    try {
-      const result = await this.loginUserUC.execute(req.body);
-
-      res.status(200).json({
-        message: "Login realizado com sucesso!",
-        ...result,
-      });
-    } catch (error) {
-      this.handleError(error, res);
-    }
-  }
 
   async getUsers(req: Request, res: Response): Promise<void> {
     try {

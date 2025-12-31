@@ -1,13 +1,13 @@
-import { User } from "../../domain/entities/User";
-import { EmailAlreadyInUseError } from "../../domain/errors/RegisterErrors.errors";
+import { User } from "../../../domain/entities/User.entity";
+import { EmailAlreadyInUseError } from "../../../domain/errors/auth.errors";
 import {
   NoFieldsToUpdateError,
   UserNotFoundError,
-} from "../../domain/errors/UserError.errors";
-import { DIUser } from "../../domain/repositories/dependency-injection-user.di";
-import { MailService } from "../../domain/services/MailService.service";
-import { PasswordService } from "../../domain/services/PasswordService.service";
-import { UpdateUserDto } from "../dtos/update-user.dto";
+} from "../../../domain/errors/user.errors";
+import { DIUser } from "../../../domain/repositories/IUser";
+import { MailService } from "../../../domain/services/Email.service";
+import { PasswordService } from "../../../domain/services/Password.service";
+import { UpdateUserDto } from "../../dtos/users/update-user.dto";
 
 export class UpdateUserUC {
   constructor(

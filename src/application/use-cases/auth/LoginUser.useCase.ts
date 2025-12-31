@@ -1,9 +1,9 @@
-import { InvalidCredentialsError } from "../../domain/errors/UserError.errors";
-import { MailService } from "../../domain/services/MailService.service";
-import { PasswordService } from "../../domain/services/PasswordService.service";
-import { TokenService } from "../../domain/services/TokenService.service";
-import { LoginUserDto } from "../dtos/login.dto";
-import { DIUser } from "../../domain/repositories/dependency-injection-user.di";
+import { InvalidCredentialsError } from "../../../domain/errors/user.errors";
+import { MailService } from "../../../domain/services/Email.service";
+import { PasswordService } from "../../../domain/services/Password.service";
+import { TokenService } from "../../../domain/services/Token.service";
+import { LoginUserDto } from "../../dtos/auth/login.dto";
+import { DIUser } from "../../../domain/repositories/IUser";
 
 interface ILoginResponse {
   accessToken: string;

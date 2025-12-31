@@ -3,8 +3,8 @@ import dotenv from "dotenv";
 import express, { Request, Response } from "express";
 import helmet from "helmet";
 import "reflect-metadata";
-import { authRoutes } from "./routes/Auth.routes";
-import { userRoutes } from "./routes/Users.routes";
+import { authRoutes } from "./infrastructure/http/routes/auth.routes";
+import { userRoutes } from "./infrastructure/http/routes/users.routes";
 
 dotenv.config();
 

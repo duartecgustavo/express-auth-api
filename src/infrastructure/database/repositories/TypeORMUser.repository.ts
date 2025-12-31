@@ -1,11 +1,11 @@
 import { Repository } from "typeorm";
-import { AppDataSource } from "../../data-source";
-import { User } from "../entities/User";
+import { User } from "../../../domain/entities/User.entity";
 import {
   DIUser,
   IFindUsersOptions,
   IPaginatedUsers,
-} from "./dependency-injection-user.di";
+} from "../../../domain/repositories/IUser";
+import { AppDataSource } from "../data-source";
 
 export class TypeORMUserRepository implements DIUser {
   private repository: Repository<User>;

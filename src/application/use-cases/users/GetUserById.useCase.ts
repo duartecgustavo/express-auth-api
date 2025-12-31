@@ -1,6 +1,6 @@
-import { User } from "../../domain/entities/User";
-import { UserNotFoundError } from "../../domain/errors/UserError.errors";
-import { DIUser } from "../../domain/repositories/dependency-injection-user.di";
+import { User } from "../../../domain/entities/User.entity";
+import { UserNotFoundError } from "../../../domain/errors/user.errors";
+import { DIUser } from "../../../domain/repositories/IUser";
 
 export class GetUserByIdUC {
   constructor(private readonly userRepository: DIUser) {}

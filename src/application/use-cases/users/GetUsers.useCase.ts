@@ -1,5 +1,5 @@
-import { DIUser } from "../../domain/repositories/dependency-injection-user.di";
-import { GetUsersDto } from "../dtos/get-users.dto";
+import { DIUser } from "../../../domain/repositories/IUser";
+import { GetUsersDto } from "../../dtos/users/get-users.dto";
 
 export class GetUsersUC {
   constructor(private readonly userRepository: DIUser) {}

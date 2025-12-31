@@ -1,5 +1,5 @@
-import { UserNotFoundError } from "../../domain/errors/UserError.errors";
-import { DIUser } from "../../domain/repositories/dependency-injection-user.di";
+import { UserNotFoundError } from "../../../domain/errors/user.errors";
+import { DIUser } from "../../../domain/repositories/IUser";
 
 export class DeleteUserUC {
   constructor(private readonly userRepository: DIUser) {}
