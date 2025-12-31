@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { DeleteUserUC } from "../application/use-cases/DeleteUser.useCase";
 import { GetUserByIdUC } from "../application/use-cases/GetUserById.useCase";
 import { GetUsersUC } from "../application/use-cases/GetUsers.useCase";
 import { LoginUserUC } from "../application/use-cases/LoginUser.useCase";
@@ -13,7 +14,6 @@ import {
   UserNotConfirmedError,
   UserNotFoundError,
 } from "../domain/errors/UserError.errors";
-import { userService } from "../services/userService";
 
 // New Controller
 export class UserController {
@@ -22,7 +22,8 @@ export class UserController {
     private readonly loginUserUC: LoginUserUC,
     private readonly getUsersUC: GetUsersUC,
     private readonly getUserByIdUC: GetUserByIdUC,
-    private readonly updateUserUC: UpdateUserUC
+    private readonly updateUserUC: UpdateUserUC,
+    private readonly deleteUserUC: DeleteUserUC
   ) {}
 
   async register(req: Request, res: Response): Promise<void> {
@@ -88,7 +89,7 @@ export class UserController {
 
   async updateUser(req: Request, res: Response): Promise<void> {
     try {
-      const id = parseInt(req.params.id, 10);
+      const id = Number(req.params.id);
 
       if (isNaN(id)) {
         res.status(400).json({ error: "ID inválido. Deve ser um número" });
@@ -101,6 +102,25 @@ export class UserController {
       res.status(200).json({
         message: "Usuário atualizado com sucesso!",
         user,
+      });
+    } catch (error) {
+      this.handleError(error, res);
+    }
+  }
+
+  async deleteUser(req: Request, res: Response): Promise<void> {
+    try {
+      const id = Number(req.params.id);
+
+      if (isNaN(id)) {
+        res.status(400).json({ error: "ID inválido. Deve ser um número" });
+        return;
+      }
+
+      await this.deleteUserUC.execute(id);
+
+      res.status(200).json({
+        message: "Usuário removido com sucesso",
       });
     } catch (error) {
       this.handleError(error, res);
@@ -149,26 +169,3 @@ export class UserController {
     });
   }
 }
-
-const deleteUser = async (req: Request, res: Response) => {
-  const userId = parseInt(req.params.id);
-
-  try {
-    const result = await userService.deleteUser(userId);
-
-    if (result.error) {
-      return res.status(404).json({ error: result.error });
-    }
-
-    res.status(200).json({
-      message: "Usuário removido com sucesso",
-    });
-  } catch (error) {
-    console.error("Erro ao remover usuário:", error);
-    res.status(500).json({
-      error: "Erro interno do servidor",
-    });
-  }
-};
-
-export { deleteUser };

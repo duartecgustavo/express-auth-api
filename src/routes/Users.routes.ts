@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { DeleteUserByIdDto } from "../application/dtos/delete-user.dto";
 import { GetUserByIdDto } from "../application/dtos/get-user-by-id.dto";
 import { GetUsersDto } from "../application/dtos/get-users.dto";
 import { UpdateUserDto } from "../application/dtos/update-user.dto";
@@ -24,6 +25,10 @@ router.patch(
   validateParams(GetUserByIdDto),
   validateBody(UpdateUserDto),
   (req, res) => authController.updateUser(req, res)
+);
+
+router.delete("/:id", validateParams(DeleteUserByIdDto), (req, res) =>
+  authController.deleteUser(req, res)
 );
 
 export { router as userRoutes };
