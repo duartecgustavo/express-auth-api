@@ -1,16 +1,13 @@
 import { Router } from "express";
-import { authMiddleware } from "../middlewares/auth";
-import { validateQuery } from "../middlewares/validateQuery.middleware";
-import { GetUsersDto } from "../../../application/dtos/users/get-users.dto";
-import { validateParams } from "../middlewares/validateParams.middleware";
-import { GetUserByIdDto } from "../../../application/dtos/users/get-user-by-id.dto";
-import { validateBody } from "../middlewares/validateBody.middleware";
-import { UpdateUserDto } from "../../../application/dtos/users/update-user.dto";
 import { DeleteUserByIdDto } from "../../../application/dtos/users/delete-user.dto";
-import {
-  authController,
-  userController,
-} from "../../di/dependency-injection-auth.di";
+import { GetUserByIdDto } from "../../../application/dtos/users/get-user-by-id.dto";
+import { GetUsersDto } from "../../../application/dtos/users/get-users.dto";
+import { UpdateUserDto } from "../../../application/dtos/users/update-user.dto";
+import { userController } from "../../di/dependency-injection-auth.di";
+import { authMiddleware } from "../middlewares/auth";
+import { validateBody } from "../middlewares/validateBody.middleware";
+import { validateParams } from "../middlewares/validateParams.middleware";
+import { validateQuery } from "../middlewares/validateQuery.middleware";
 
 const router = Router();
 
