@@ -1,3 +1,5 @@
+import { PasswordValidationError } from "../types/password.types";
+
 export class EmailAlreadyInUseError extends Error {
   constructor() {
     super("Email já esta em uso");
@@ -6,7 +8,7 @@ export class EmailAlreadyInUseError extends Error {
 }
 
 export class WeakPasswordError extends Error {
-  constructor(public readonly errors: string[]) {
+  constructor(public readonly errors: PasswordValidationError[]) {
     super("Senha não atende aos requisitps de segurança");
     this.name = "WeakPasswordError";
   }
