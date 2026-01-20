@@ -37,7 +37,7 @@ export class LoginUserUC {
     }
 
     // 3. Validar senha
-    const isPasswordValid = this.passwordService.compare(
+    const isPasswordValid = await this.passwordService.compare(
       password,
       user.password
     );
