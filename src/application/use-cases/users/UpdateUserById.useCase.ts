@@ -1,5 +1,8 @@
 import { User } from "../../../domain/entities/User.entity";
-import { EmailAlreadyInUseError } from "../../../domain/errors/auth.errors";
+import {
+  EmailAlreadyInUseError,
+  WeakPasswordError,
+} from "../../../domain/errors/auth.errors";
 import {
   NoFieldsToUpdateError,
   UserNotFoundError,
@@ -20,7 +23,7 @@ export class UpdateUserUC {
     userId: string,
     dto: UpdateUserDto
   ): Promise<Omit<User, "password">> {
-    if (!dto.email && !dto.name && !dto.name && dto.isConfirmed === undefined) {
+    if (!dto.email && !dto.name && dto.isConfirmed === undefined) {
       throw new NoFieldsToUpdateError();
     }
 
@@ -50,7 +53,7 @@ export class UpdateUserUC {
       const passwordValidation = this.passwordService.validate(dto.password);
 
       if (!passwordValidation.isValid) {
-        throw new Error(`Senha fraca ${passwordValidation.errors.join(", ")}`);
+        throw new WeakPasswordError(passwordValidation.errors);
       }
 
       user.password = await this.passwordService.hash(dto.password);
@@ -58,10 +61,10 @@ export class UpdateUserUC {
 
     if (dto.name) {
       user.name = dto.name.trim();
+    }
 
-      if (dto.isConfirmed !== undefined) {
-        user.isConfirmed = dto.isConfirmed;
-      }
+    if (dto.isConfirmed !== undefined) {
+      user.isConfirmed = dto.isConfirmed;
     }
 
     const updatedUser = await this.userRepository.save(user);

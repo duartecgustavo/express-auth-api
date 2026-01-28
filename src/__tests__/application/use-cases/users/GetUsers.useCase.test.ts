@@ -3,7 +3,7 @@ import { GetUsersUC } from "../../../../application/use-cases/users/GetUsers.use
 import { User } from "../../../../domain/entities/User.entity";
 import { DIUser } from "../../../../domain/repositories/IUser";
 
-describe("", () => {
+describe("GetUsersUseCase class", () => {
   let getUsersUC: GetUsersUC;
   let mockUserRepository: jest.Mocked<DIUser>;
 
