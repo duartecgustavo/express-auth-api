@@ -23,7 +23,12 @@ export class UpdateUserUC {
     userId: string,
     dto: UpdateUserDto
   ): Promise<Omit<User, "password">> {
-    if (!dto.email && !dto.name && dto.isConfirmed === undefined) {
+    if (
+      !dto.email &&
+      !dto.name &&
+      !dto.password &&
+      dto.isConfirmed === undefined
+    ) {
       throw new NoFieldsToUpdateError();
     }
 
