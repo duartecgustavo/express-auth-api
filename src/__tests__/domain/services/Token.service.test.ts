@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import { TokenService } from "../../../domain/services/Token.service";
-import { TokenPayload } from "../../../infrastructure/http/middlewares/auth";
+import { TokenPayload } from "../../../infrastructure/http/middlewares/auth.middleware";
 
 jest.mock("jsonwebtoken", () => ({
   sign: jest.fn(),

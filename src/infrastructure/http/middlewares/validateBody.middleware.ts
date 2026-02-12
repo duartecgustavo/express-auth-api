@@ -12,6 +12,13 @@ declare global {
 
 export function validateBody(dtoClass: any) {
   return async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.body || typeof req.body !== "object") {
+      return res.status(400).json({
+        error: "Validation failed",
+        messages: ["Request body is required"],
+      });
+    }
+
     const dto = plainToClass(dtoClass, req.body);
     const errors = await validate(dto as object);
 

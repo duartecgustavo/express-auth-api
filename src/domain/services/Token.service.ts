@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { TokenPayload } from "../../infrastructure/http/middlewares/auth";
+import { TokenPayload } from "../../infrastructure/http/middlewares/auth.middleware";
 
 export class TokenService {
   private readonly accessTokenSecret: string;

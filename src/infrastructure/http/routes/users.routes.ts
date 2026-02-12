@@ -4,7 +4,7 @@ import { GetUserByIdDto } from "../../../application/dtos/users/get-user-by-id.d
 import { GetUsersDto } from "../../../application/dtos/users/get-users.dto";
 import { UpdateUserDto } from "../../../application/dtos/users/update-user.dto";
 import { userController } from "../../di/dependency-injection-auth.di";
-import { authMiddleware } from "../middlewares/auth";
+import { authMiddleware } from "../middlewares/auth.middleware";
 import { validateBody } from "../middlewares/validateBody.middleware";
 import { validateParams } from "../middlewares/validateParams.middleware";
 import { validateQuery } from "../middlewares/validateQuery.middleware";

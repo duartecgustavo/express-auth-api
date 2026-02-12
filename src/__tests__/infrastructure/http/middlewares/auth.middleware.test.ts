@@ -5,7 +5,7 @@ import {
   AuthenticatedRequest,
   authMiddleware,
   TokenPayload,
-} from "../../../../infrastructure/http/middlewares/auth";
+} from "../../../../infrastructure/http/middlewares/auth.middleware";
 
 jest.mock("jsonwebtoken");
 const mockedJwt = jwt as jest.Mocked<typeof jwt>;
