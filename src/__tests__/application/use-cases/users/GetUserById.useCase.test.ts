@@ -11,6 +11,7 @@ describe("GetUserByIdUseCase class", () => {
     mockUserRepository = {
       findById: jest.fn(),
       findByEmail: jest.fn(),
+      findByCode: jest.fn(),
       findAll: jest.fn(),
       save: jest.fn(),
       delete: jest.fn(),
@@ -25,9 +26,12 @@ describe("GetUserByIdUseCase class", () => {
 
       const mockUser: User = {
         id: 1,
+        code: "user-code-123",
         email: "usuario@exemplo.com",
         password: "hashed-password-secret",
         name: "João Silva",
+        nickname: "joaosilva",
+        linkedin: null,
         isConfirmed: true,
         createdAt: new Date("2024-01-01"),
       };
@@ -38,8 +42,11 @@ describe("GetUserByIdUseCase class", () => {
 
       expect(result).toEqual({
         id: 1,
+        code: "user-code-123",
         email: "usuario@exemplo.com",
         name: "João Silva",
+        nickname: "joaosilva",
+        linkedin: null,
         isConfirmed: true,
         createdAt: mockUser.createdAt,
       });
@@ -86,9 +93,12 @@ describe("GetUserByIdUseCase class", () => {
 
       const mockUser: User = {
         id: 1,
+        code: "user-code-123",
         email: "complete@test.com",
         password: "hashed",
         name: "Complete User",
+        nickname: "complete",
+        linkedin: null,
         isConfirmed: false,
         createdAt: new Date(),
       };
@@ -98,8 +108,11 @@ describe("GetUserByIdUseCase class", () => {
       const result = await getUserByIdUC.execute(userId);
 
       expect(result).toHaveProperty("id");
+      expect(result).toHaveProperty("code");
       expect(result).toHaveProperty("email");
       expect(result).toHaveProperty("name");
+      expect(result).toHaveProperty("nickname");
+      expect(result).toHaveProperty("linkedin");
       expect(result).toHaveProperty("isConfirmed");
       expect(result).toHaveProperty("createdAt");
 

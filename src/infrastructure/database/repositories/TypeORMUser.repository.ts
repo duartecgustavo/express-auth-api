@@ -22,6 +22,10 @@ export class TypeORMUserRepository implements DIUser {
     return this.repository.findOneBy({ id });
   }
 
+  async findByCode(code: string): Promise<User | null> {
+    return this.repository.findOneBy({ code });
+  }
+
   async save(user: User): Promise<User> {
     return this.repository.save(user);
   }
@@ -41,14 +45,25 @@ export class TypeORMUserRepository implements DIUser {
 
     const skip = (page - 1) * limit;
 
-    const whereCondition = search ? [{ name: search }, { email: search }] : {};
+    const whereCondition = search
+      ? [{ name: search }, { email: search }, { nickname: search }]
+      : {};
 
     const [users, total] = await this.repository.findAndCount({
       where: whereCondition,
       order: { [sortBy]: order.toUpperCase() },
       skip,
       take: limit,
-      select: ["id", "email", "name", "isConfirmed", "createdAt"],
+      select: [
+        "id",
+        "code",
+        "email",
+        "name",
+        "nickname",
+        "linkedin",
+        "isConfirmed",
+        "createdAt",
+      ],
     });
 
     return {

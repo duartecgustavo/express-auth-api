@@ -19,9 +19,10 @@ describe("RegisterUserUseCase class", () => {
   beforeEach(() => {
     mockUserRepository = {
       findByEmail: jest.fn(),
+      findById: jest.fn(),
+      findByCode: jest.fn(),
       findAll: jest.fn(),
       delete: jest.fn(),
-      findById: jest.fn(),
       save: jest.fn(),
     } as jest.Mocked<DIUser>;
 
@@ -48,17 +49,22 @@ describe("RegisterUserUseCase class", () => {
       const dto: RegisterUserDto = {
         email: "NOVO@EXEMPLO.COM",
         name: "João Silva",
+        nickname: "joaosilva",
         password: "SenhaForte@123",
       };
 
       const normalizedEmail = "novo@exemplo.com";
       const hashedPassword = "hashed-password-123";
+      const code = "uuid-code-123";
 
       const savedUser: User = {
         id: 1,
+        code,
         email: normalizedEmail,
         password: hashedPassword,
         name: "João Silva",
+        nickname: "joaosilva",
+        linkedin: null,
         isConfirmed: false,
         createdAt: new Date(),
       };
@@ -76,8 +82,11 @@ describe("RegisterUserUseCase class", () => {
 
       expect(result).toEqual({
         id: 1,
+        code,
         email: normalizedEmail,
         name: "João Silva",
+        nickname: "joaosilva",
+        linkedin: null,
         isConfirmed: false,
         createdAt: savedUser.createdAt,
       });
@@ -96,9 +105,12 @@ describe("RegisterUserUseCase class", () => {
       expect(mockUserRepository.save).toHaveBeenCalledTimes(1);
       expect(mockUserRepository.save).toHaveBeenCalledWith(
         expect.objectContaining({
+          code: expect.any(String),
           email: normalizedEmail,
           password: hashedPassword,
           name: "João Silva",
+          nickname: "joaosilva",
+          linkedin: null,
           isConfirmed: false,
         })
       );
@@ -108,6 +120,7 @@ describe("RegisterUserUseCase class", () => {
         email: "  USUARIO@EXEMPLO.COM  ",
         password: "SenhaForte@123",
         name: "Teste",
+        nickname: "teste",
       };
 
       mockEmailService.normalize.mockReturnValue("usuario@exemplo.com");
@@ -119,10 +132,14 @@ describe("RegisterUserUseCase class", () => {
       mockPasswordService.hash.mockResolvedValue("hash");
       mockUserRepository.save.mockResolvedValue({
         id: 1,
+        code: "uuid-1",
         email: "usuario@exemplo.com",
         password: "hashed",
         name: "Teste",
+        nickname: "teste",
+        linkedin: null,
         isConfirmed: false,
+        createdAt: new Date(),
       } as User);
 
       await registerUserUC.execute(dto);
@@ -141,6 +158,7 @@ describe("RegisterUserUseCase class", () => {
         email: "test@test.com",
         password: "SenhaForte@123",
         name: "   Nome Com Espaços   ",
+        nickname: "nick",
       };
 
       mockEmailService.normalize.mockReturnValue("test@test.com");
@@ -152,7 +170,10 @@ describe("RegisterUserUseCase class", () => {
       mockPasswordService.hash.mockResolvedValue("hashed");
       mockUserRepository.save.mockResolvedValue({
         id: 1,
+        code: "uuid-1",
         name: "Nome Com Espaços",
+        nickname: "nick",
+        linkedin: null,
       } as User);
 
       await registerUserUC.execute(dto);
@@ -168,6 +189,7 @@ describe("RegisterUserUseCase class", () => {
         email: "test@test.com",
         password: "SenhaForte@123",
         name: "Teste",
+        nickname: "teste",
       };
 
       mockEmailService.normalize.mockReturnValue("test@test.com");
@@ -179,6 +201,9 @@ describe("RegisterUserUseCase class", () => {
       mockPasswordService.hash.mockResolvedValue("hashed");
       mockUserRepository.save.mockResolvedValue({
         id: 1,
+        code: "uuid-1",
+        nickname: "teste",
+        linkedin: null,
         isConfirmed: false,
       } as User);
 
@@ -197,13 +222,17 @@ describe("RegisterUserUseCase class", () => {
         email: "existente@exemplo.com",
         password: "SenhaForte@123",
         name: "Teste",
+        nickname: "teste",
       };
 
       const existingUser: User = {
         id: 999,
+        code: "uuid-existing",
         email: "existente@exemplo.com",
         password: "old-hash",
         name: "Usuário Existente",
+        nickname: "existente",
+        linkedin: null,
         isConfirmed: true,
         createdAt: new Date(),
       };
@@ -225,6 +254,7 @@ describe("RegisterUserUseCase class", () => {
           email: "novo@exemplo.com",
           password: "123",
           name: "Teste",
+          nickname: "teste",
         };
 
         const passwordErrors = [
@@ -268,6 +298,7 @@ describe("RegisterUserUseCase class", () => {
         email: "test@test.com",
         password: "SenhaForte@123",
         name: "Teste",
+        nickname: "teste",
       };
 
       const callOrder: string[] = [];
@@ -294,7 +325,13 @@ describe("RegisterUserUseCase class", () => {
 
       mockUserRepository.save.mockImplementation(async (user) => {
         callOrder.push("save");
-        return { ...user, id: 1 } as User;
+        return {
+          ...user,
+          id: 1,
+          code: user.code ?? "uuid",
+          nickname: user.nickname ?? "teste",
+          linkedin: user.linkedin ?? null,
+        } as User;
       });
 
       await registerUserUC.execute(dto);
@@ -314,6 +351,7 @@ describe("RegisterUserUseCase class", () => {
         email: "test@test.com",
         password: "SenhaForte@123",
         name: "Teste",
+        nickname: "teste",
       };
 
       mockEmailService.normalize.mockReturnValue("test@test.com");
@@ -325,10 +363,14 @@ describe("RegisterUserUseCase class", () => {
       mockPasswordService.hash.mockResolvedValue("super-secret-hash");
       mockUserRepository.save.mockResolvedValue({
         id: 1,
+        code: "uuid-1",
         email: "test@test.com",
         password: "super-secret-hash",
         name: "Teste",
+        nickname: "teste",
+        linkedin: null,
         isConfirmed: false,
+        createdAt: new Date(),
       } as User);
 
       const result = await registerUserUC.execute(dto);
@@ -342,6 +384,7 @@ describe("RegisterUserUseCase class", () => {
         email: "test@test.com",
         password: "MinhaSenha@123",
         name: "Teste",
+        nickname: "teste",
       };
 
       mockEmailService.normalize.mockReturnValue("test@test.com");

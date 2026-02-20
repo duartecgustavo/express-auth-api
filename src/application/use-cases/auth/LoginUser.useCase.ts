@@ -11,8 +11,11 @@ interface ILoginResponse {
   expiresIn: number;
   user: {
     id: string;
+    code: string;
     email: string;
     name: string;
+    nickname: string;
+    linkedin: string | null;
   };
 }
 
@@ -65,8 +68,11 @@ export class LoginUserUC {
       expiresIn: 900,
       user: {
         id: String(user.id),
+        code: user.code,
         email: user.email,
         name: user.name,
+        nickname: user.nickname,
+        linkedin: user.linkedin,
       },
     };
   }

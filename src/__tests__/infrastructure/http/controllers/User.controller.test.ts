@@ -79,16 +79,22 @@ describe("UserController", () => {
           users: [
             {
               id: 1,
+              code: "code-1",
               email: "user1@test.com",
               name: "User 1",
+              nickname: "user1",
+              linkedin: null,
               isConfirmed: true,
               createdAt: new Date(),
               updatedAt: new Date(),
             },
             {
               id: 2,
+              code: "code-2",
               email: "user2@test.com",
               name: "User 2",
+              nickname: "user2",
+              linkedin: null,
               isConfirmed: false,
               createdAt: new Date(),
               updatedAt: new Date(),
@@ -182,8 +188,11 @@ describe("UserController", () => {
       it("should return user with 200", async () => {
         const mockUser = {
           id: 1,
+          code: "user-code-123",
           email: "user@test.com",
           name: "Test User",
+          nickname: "testuser",
+          linkedin: null,
           isConfirmed: true,
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -246,8 +255,11 @@ describe("UserController", () => {
       it("should update user and return 200", async () => {
         const mockUser = {
           id: 1,
+          code: "user-code-123",
           email: "updated@test.com",
           name: "Updated Name",
+          nickname: "updated",
+          linkedin: null,
           isConfirmed: true,
           createdAt: new Date(),
           updatedAt: new Date(),

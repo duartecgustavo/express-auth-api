@@ -1,4 +1,11 @@
-import { IsEmail, IsString, MaxLength, MinLength } from "class-validator";
+import {
+  IsEmail,
+  IsOptional,
+  IsString,
+  IsUrl,
+  MaxLength,
+  MinLength,
+} from "class-validator";
 
 export class RegisterUserDto {
   @IsEmail({}, { message: "Email invalido" })
@@ -13,4 +20,14 @@ export class RegisterUserDto {
   @MinLength(2, { message: "Nome deve ter no mínimo 2 caracteres" })
   @MaxLength(100, { message: "Nome muito longo" })
   name: string;
+
+  @IsString()
+  @MinLength(2, { message: "Nickname deve ter no mínimo 2 caracteres" })
+  @MaxLength(50, { message: "Nickname muito longo" })
+  nickname: string;
+
+  @IsOptional()
+  @IsUrl({}, { message: "LinkedIn deve ser uma URL válida" })
+  @MaxLength(255)
+  linkedin?: string;
 }

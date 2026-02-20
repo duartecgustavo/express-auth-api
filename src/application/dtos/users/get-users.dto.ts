@@ -21,7 +21,7 @@ export class GetUsersDto {
 
   @IsOptional()
   @IsString()
-  sortBy?: "name" | "email" | "createdAt" = "createdAt";
+  sortBy?: "name" | "email" | "nickname" | "createdAt" = "createdAt";
 
   @IsOptional()
   @IsString()

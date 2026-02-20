@@ -4,7 +4,7 @@ export interface IFindUsersOptions {
   page?: number;
   limit?: number;
   search?: string;
-  sortBy?: "name" | "email" | "createdAt";
+  sortBy?: "name" | "email" | "nickname" | "createdAt";
   order?: "asc" | "desc";
 }
 
@@ -19,6 +19,7 @@ export interface IPaginatedUsers {
 export interface DIUser {
   findByEmail(email: string): Promise<User | null>;
   findById(id: number): Promise<User | null>;
+  findByCode(code: string): Promise<User | null>;
   save(user: User): Promise<User>;
   delete(id: number): Promise<void>;
   findAll(options?: IFindUsersOptions): Promise<IPaginatedUsers>;

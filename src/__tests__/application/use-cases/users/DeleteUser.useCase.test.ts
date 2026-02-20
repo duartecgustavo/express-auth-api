@@ -12,6 +12,7 @@ describe("DeleteUserUseCase class", () => {
     mockUserRepository = {
       findById: jest.fn(),
       findByEmail: jest.fn(),
+      findByCode: jest.fn(),
       save: jest.fn(),
       delete: jest.fn(),
       findAll: jest.fn(),
@@ -32,9 +33,12 @@ describe("DeleteUserUseCase class", () => {
 
       const mockUser: User = {
         id: 1,
+        code: "user-code-123",
         email: "usuario@exemplo.com",
         password: "hashed-password",
         name: "João Silva",
+        nickname: "joaosilva",
+        linkedin: null,
         isConfirmed: true,
         createdAt: new Date(),
       };

@@ -58,8 +58,11 @@ describe("AuthController", () => {
       it("should register user and return 201", async () => {
         const mockUser = {
           id: 1,
+          code: "user-code-123",
           email: "user@example.com",
           name: "John Doe",
+          nickname: "johndoe",
+          linkedin: null,
           isConfirmed: false,
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -69,6 +72,7 @@ describe("AuthController", () => {
           email: "user@example.com",
           password: "StrongPass@123",
           name: "John Doe",
+          nickname: "johndoe",
         };
 
         mockRegisterUserUC.execute.mockResolvedValue(mockUser);
@@ -181,8 +185,11 @@ describe("AuthController", () => {
           expiresIn: 900,
           user: {
             id: "1",
+            code: "user-code-123",
             email: "user@example.com",
             name: "John Doe",
+            nickname: "johndoe",
+            linkedin: null,
           },
         };
 
@@ -204,8 +211,11 @@ describe("AuthController", () => {
           expiresIn: 900,
           user: {
             id: "1",
+            code: "user-code-123",
             email: "user@example.com",
             name: "John Doe",
+            nickname: "johndoe",
+            linkedin: null,
           },
         });
       });
@@ -230,7 +240,14 @@ describe("AuthController", () => {
           accessToken: "token",
           refreshToken: "refresh",
           expiresIn: 900,
-          user: { id: "1", email: "test@test.com", name: "Test" },
+          user: {
+            id: "1",
+            code: "code-1",
+            email: "test@test.com",
+            name: "Test",
+            nickname: "test",
+            linkedin: null,
+          },
         };
 
         mockReq.body = { email: "test@test.com", password: "Pass@123" };

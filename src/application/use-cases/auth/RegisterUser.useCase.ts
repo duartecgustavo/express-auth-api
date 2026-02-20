@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import {
   EmailAlreadyInUseError,
   WeakPasswordError,
@@ -16,7 +17,7 @@ export class RegisterUserUC {
   ) {}
 
   async execute(dto: RegisterUserDto): Promise<Omit<User, "password">> {
-    const { email, name, password } = dto;
+    const { email, name, password, nickname, linkedin } = dto;
 
     // 1. Normalizar email
     const normalizedEmail = this.emailService.normalize(email);
@@ -38,9 +39,12 @@ export class RegisterUserUC {
 
     // 5. Criar entidade do usuario
     const user = new User();
+    user.code = randomUUID();
     user.email = normalizedEmail;
     user.password = hashedPassword as unknown as string;
     user.name = name.trim();
+    user.nickname = nickname.trim();
+    user.linkedin = linkedin?.trim() || null;
     user.isConfirmed = false;
 
     // 6. Salvar usuario

@@ -11,6 +11,7 @@ describe("GetUsersUseCase class", () => {
     mockUserRepository = {
       findById: jest.fn(),
       findByEmail: jest.fn(),
+      findByCode: jest.fn(),
       save: jest.fn(),
       delete: jest.fn(),
       findAll: jest.fn(),
@@ -29,17 +30,23 @@ describe("GetUsersUseCase class", () => {
       const mockUsers: User[] = [
         {
           id: 1,
+          code: "code-1",
           email: "usuario1@exemplo.com",
           password: "hashed1",
           name: "Usuário 1",
+          nickname: "user1",
+          linkedin: null,
           isConfirmed: true,
           createdAt: new Date(),
         },
         {
           id: 2,
+          code: "code-2",
           email: "usuario2@exemplo.com",
           password: "hashed2",
           name: "Usuário 2",
+          nickname: "user2",
+          linkedin: null,
           isConfirmed: false,
           createdAt: new Date(),
         },

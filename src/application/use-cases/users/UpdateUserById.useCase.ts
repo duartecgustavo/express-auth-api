@@ -27,6 +27,8 @@ export class UpdateUserUC {
       !dto.email &&
       !dto.name &&
       !dto.password &&
+      dto.nickname === undefined &&
+      dto.linkedin === undefined &&
       dto.isConfirmed === undefined
     ) {
       throw new NoFieldsToUpdateError();
@@ -66,6 +68,14 @@ export class UpdateUserUC {
 
     if (dto.name) {
       user.name = dto.name.trim();
+    }
+
+    if (dto.nickname !== undefined) {
+      user.nickname = dto.nickname.trim();
+    }
+
+    if (dto.linkedin !== undefined) {
+      user.linkedin = dto.linkedin?.trim() || null;
     }
 
     if (dto.isConfirmed !== undefined) {

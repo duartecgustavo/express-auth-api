@@ -22,18 +22,24 @@ describe("UpdateUserUseCase class", () => {
 
   const mockExistingUser: User = {
     id: 1,
+    code: "user-code-123",
     email: "original@exemplo.com",
     password: "hashed-password",
     name: "Nome Original",
+    nickname: "original",
+    linkedin: null,
     isConfirmed: false,
     createdAt: new Date("2024-01-01"),
   };
 
   const makeUser = (): User => ({
     id: 1,
+    code: "user-code-123",
     email: "original@exemplo.com",
     password: "hashed-password",
     name: "Nome Original",
+    nickname: "original",
+    linkedin: null,
     isConfirmed: false,
     createdAt: new Date("2024-01-01"),
   });
@@ -42,6 +48,7 @@ describe("UpdateUserUseCase class", () => {
     mockUserRepository = {
       findById: jest.fn(),
       findByEmail: jest.fn(),
+      findByCode: jest.fn(),
       save: jest.fn(),
       delete: jest.fn(),
       findAll: jest.fn(),

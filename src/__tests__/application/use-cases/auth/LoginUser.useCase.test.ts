@@ -22,6 +22,7 @@ describe("LoginUseCase class", () => {
     mockUserRepository = {
       findByEmail: jest.fn(),
       findById: jest.fn(),
+      findByCode: jest.fn(),
       save: jest.fn(),
       delete: jest.fn(),
       findAll: jest.fn(),
@@ -62,9 +63,12 @@ describe("LoginUseCase class", () => {
 
       const mockUser: User = {
         id: 1,
+        code: "user-code-123",
         email: "usuario@exemplo.com",
         password: "$2b$10$hashedPassword",
         name: "João Silva",
+        nickname: "joaosilva",
+        linkedin: null,
         isConfirmed: true,
         createdAt: new Date(),
       };
@@ -85,8 +89,11 @@ describe("LoginUseCase class", () => {
         expiresIn: 900,
         user: {
           id: "1",
+          code: "user-code-123",
           email: "usuario@exemplo.com",
           name: "João Silva",
+          nickname: "joaosilva",
+          linkedin: null,
         },
       });
 
@@ -178,7 +185,12 @@ describe("LoginUseCase class", () => {
       mockMailService.normalize.mockReturnValue("user@test.com");
       mockUserRepository.findByEmail.mockResolvedValue({
         id: 1,
+        code: "code-1",
+        email: "user@test.com",
         password: "hashed",
+        name: "User",
+        nickname: "user",
+        linkedin: null,
       } as User);
       mockPasswordService.compare.mockResolvedValue(true);
       mockTokenService.generateAccessToken.mockReturnValue("access");
@@ -217,9 +229,12 @@ describe("LoginUseCase class", () => {
 
       const mockUser: User = {
         id: 1,
+        code: "code-1",
         email: "usuario@exemplo.com",
         password: "$2b$10$hashedPassword",
         name: "João Silva",
+        nickname: "joao",
+        linkedin: null,
       } as User;
 
       mockMailService.normalize.mockReturnValue("naoexiste@exemplo.com");
@@ -247,7 +262,12 @@ describe("LoginUseCase class", () => {
       mockMailService.normalize.mockReturnValue("existe@test.com");
       mockUserRepository.findByEmail.mockResolvedValue({
         id: 1,
+        code: "code-1",
+        email: "existe@test.com",
         password: "hashed",
+        name: "User",
+        nickname: "user",
+        linkedin: null,
       } as User);
       mockPasswordService.compare.mockResolvedValue(false);
 
@@ -269,9 +289,12 @@ describe("LoginUseCase class", () => {
       mockMailService.normalize.mockReturnValue("user@test.com");
       mockUserRepository.findByEmail.mockResolvedValue({
         id: 1,
+        code: "code-1",
         email: "user@test.com",
         password: "super-secret-hash-abc123",
         name: "User",
+        nickname: "user",
+        linkedin: null,
       } as User);
       mockPasswordService.compare.mockResolvedValue(true);
       mockTokenService.generateAccessToken.mockReturnValue("access");
@@ -292,9 +315,12 @@ describe("LoginUseCase class", () => {
       mockMailService.normalize.mockReturnValue("user@test.com");
       mockUserRepository.findByEmail.mockResolvedValue({
         id: 999,
+        code: "code-999",
         email: "user@test.com",
         password: "hashed",
         name: "User",
+        nickname: "user",
+        linkedin: null,
       } as User);
       mockPasswordService.compare.mockResolvedValue(true);
       mockTokenService.generateAccessToken.mockReturnValue("access");
