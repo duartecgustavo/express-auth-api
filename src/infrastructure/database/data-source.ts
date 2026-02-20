@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import "reflect-metadata";
 import { DataSource } from "typeorm";
+import { PendingRegistration } from "../../domain/entities/PendingRegistration.entity";
 import { User } from "../../domain/entities/User.entity";
 
 dotenv.config();
@@ -22,7 +23,7 @@ export const AppDataSource = new DataSource({
   // Logging controlado por ambiente
   logging: process.env.DB_LOGGING === "true" || !isProduction,
 
-  entities: [User],
+  entities: [User, PendingRegistration],
   migrations: ["src/migrations/**/*.ts"],
   subscribers: [],
 

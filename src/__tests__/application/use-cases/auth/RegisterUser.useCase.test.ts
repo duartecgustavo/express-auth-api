@@ -6,6 +6,8 @@ import {
   WeakPasswordError,
 } from "../../../../domain/errors/auth.errors";
 import { DIUser } from "../../../../domain/repositories/IUser";
+import { IPendingRegistrationRepository } from "../../../../domain/repositories/IPendingRegistration";
+import { IVerificationService } from "../../../../domain/services/Verification.service";
 import { MailService } from "../../../../domain/services/Email.service";
 import { PasswordService } from "../../../../domain/services/Password.service";
 import { PasswordErrorCode } from "../../../../domain/types/password.types";
@@ -13,8 +15,10 @@ import { PasswordErrorCode } from "../../../../domain/types/password.types";
 describe("RegisterUserUseCase class", () => {
   let registerUserUC: RegisterUserUC;
   let mockUserRepository: jest.Mocked<DIUser>;
+  let mockPendingRepository: jest.Mocked<IPendingRegistrationRepository>;
   let mockPasswordService: jest.Mocked<PasswordService>;
   let mockEmailService: jest.Mocked<MailService>;
+  let mockVerificationService: jest.Mocked<IVerificationService>;
 
   beforeEach(() => {
     mockUserRepository = {
@@ -25,6 +29,12 @@ describe("RegisterUserUseCase class", () => {
       delete: jest.fn(),
       save: jest.fn(),
     } as jest.Mocked<DIUser>;
+
+    mockPendingRepository = {
+      findByEmail: jest.fn(),
+      save: jest.fn(),
+      deleteByEmail: jest.fn(),
+    } as jest.Mocked<IPendingRegistrationRepository>;
 
     mockPasswordService = {
       hash: jest.fn(),
@@ -37,15 +47,22 @@ describe("RegisterUserUseCase class", () => {
       validate: jest.fn(),
     } as unknown as jest.Mocked<MailService>;
 
+    mockVerificationService = {
+      sendCode: jest.fn(),
+      verifyCode: jest.fn(),
+    } as jest.Mocked<IVerificationService>;
+
     registerUserUC = new RegisterUserUC(
       mockUserRepository,
+      mockPendingRepository,
       mockPasswordService,
-      mockEmailService
+      mockEmailService,
+      mockVerificationService
     );
   });
 
   describe("when the registration is successfull", () => {
-    it("must register a new user", async () => {
+    it("must save pending and send verification code", async () => {
       const dto: RegisterUserDto = {
         email: "NOVO@EXEMPLO.COM",
         name: "João Silva",
@@ -55,19 +72,6 @@ describe("RegisterUserUseCase class", () => {
 
       const normalizedEmail = "novo@exemplo.com";
       const hashedPassword = "hashed-password-123";
-      const code = "uuid-code-123";
-
-      const savedUser: User = {
-        id: 1,
-        code,
-        email: normalizedEmail,
-        password: hashedPassword,
-        name: "João Silva",
-        nickname: "joaosilva",
-        linkedin: null,
-        isConfirmed: false,
-        createdAt: new Date(),
-      };
 
       mockEmailService.normalize.mockReturnValue(normalizedEmail);
       mockUserRepository.findByEmail.mockResolvedValue(null);
@@ -76,45 +80,41 @@ describe("RegisterUserUseCase class", () => {
         errors: [],
       });
       mockPasswordService.hash.mockResolvedValue(hashedPassword);
-      mockUserRepository.save.mockResolvedValue(savedUser);
+      mockPendingRepository.save.mockResolvedValue({} as any);
+      mockVerificationService.sendCode.mockResolvedValue(undefined);
 
       const result = await registerUserUC.execute(dto);
 
       expect(result).toEqual({
-        id: 1,
-        code,
+        message:
+          "Cadastro iniciado. Verifique seu email e confirme o código para efetivar o cadastro.",
         email: normalizedEmail,
-        name: "João Silva",
-        nickname: "joaosilva",
-        linkedin: null,
-        isConfirmed: false,
-        createdAt: savedUser.createdAt,
       });
-
-      expect(result).not.toHaveProperty("password");
       expect(mockEmailService.normalize).toHaveBeenCalledWith(
         "NOVO@EXEMPLO.COM"
       );
       expect(mockUserRepository.findByEmail).toHaveBeenCalledWith(
-        "NOVO@EXEMPLO.COM"
+        normalizedEmail
       );
       expect(mockPasswordService.validate).toHaveBeenCalledWith(
         "SenhaForte@123"
       );
       expect(mockPasswordService.hash).toHaveBeenCalledWith("SenhaForte@123");
-      expect(mockUserRepository.save).toHaveBeenCalledTimes(1);
-      expect(mockUserRepository.save).toHaveBeenCalledWith(
+      expect(mockPendingRepository.save).toHaveBeenCalledTimes(1);
+      expect(mockPendingRepository.save).toHaveBeenCalledWith(
         expect.objectContaining({
-          code: expect.any(String),
           email: normalizedEmail,
           password: hashedPassword,
           name: "João Silva",
           nickname: "joaosilva",
           linkedin: null,
-          isConfirmed: false,
         })
       );
+      expect(mockVerificationService.sendCode).toHaveBeenCalledWith(
+        normalizedEmail
+      );
     });
+
     it("must normalize the email before saving", async () => {
       const dto: RegisterUserDto = {
         email: "  USUARIO@EXEMPLO.COM  ",
@@ -130,30 +130,22 @@ describe("RegisterUserUseCase class", () => {
         errors: [],
       });
       mockPasswordService.hash.mockResolvedValue("hash");
-      mockUserRepository.save.mockResolvedValue({
-        id: 1,
-        code: "uuid-1",
-        email: "usuario@exemplo.com",
-        password: "hashed",
-        name: "Teste",
-        nickname: "teste",
-        linkedin: null,
-        isConfirmed: false,
-        createdAt: new Date(),
-      } as User);
+      mockPendingRepository.save.mockResolvedValue({} as any);
+      mockVerificationService.sendCode.mockResolvedValue(undefined);
 
       await registerUserUC.execute(dto);
 
       expect(mockEmailService.normalize).toHaveBeenCalledWith(
         "  USUARIO@EXEMPLO.COM  "
       );
-      expect(mockUserRepository.save).toHaveBeenCalledWith(
+      expect(mockPendingRepository.save).toHaveBeenCalledWith(
         expect.objectContaining({
           email: "usuario@exemplo.com",
         })
       );
     });
-    it("must trim in name before saving", async () => {
+
+    it("must trim name and nickname before saving", async () => {
       const dto: RegisterUserDto = {
         email: "test@test.com",
         password: "SenhaForte@123",
@@ -168,54 +160,20 @@ describe("RegisterUserUseCase class", () => {
         errors: [],
       });
       mockPasswordService.hash.mockResolvedValue("hashed");
-      mockUserRepository.save.mockResolvedValue({
-        id: 1,
-        code: "uuid-1",
-        name: "Nome Com Espaços",
-        nickname: "nick",
-        linkedin: null,
-      } as User);
+      mockPendingRepository.save.mockResolvedValue({} as any);
+      mockVerificationService.sendCode.mockResolvedValue(undefined);
 
       await registerUserUC.execute(dto);
 
-      expect(mockUserRepository.save).toHaveBeenCalledWith(
+      expect(mockPendingRepository.save).toHaveBeenCalledWith(
         expect.objectContaining({
           name: "Nome Com Espaços",
-        })
-      );
-    });
-    it("must save the user with isConfirmed = false", async () => {
-      const dto: RegisterUserDto = {
-        email: "test@test.com",
-        password: "SenhaForte@123",
-        name: "Teste",
-        nickname: "teste",
-      };
-
-      mockEmailService.normalize.mockReturnValue("test@test.com");
-      mockUserRepository.findByEmail.mockResolvedValue(null);
-      mockPasswordService.validate.mockReturnValue({
-        isValid: true,
-        errors: [],
-      });
-      mockPasswordService.hash.mockResolvedValue("hashed");
-      mockUserRepository.save.mockResolvedValue({
-        id: 1,
-        code: "uuid-1",
-        nickname: "teste",
-        linkedin: null,
-        isConfirmed: false,
-      } as User);
-
-      await registerUserUC.execute(dto);
-
-      expect(mockUserRepository.save).toHaveBeenCalledWith(
-        expect.objectContaining({
-          isConfirmed: false,
+          nickname: "nick",
         })
       );
     });
   });
+
   describe("when the email has already been used", () => {
     it("must throw EmailAlreadyInUseError", async () => {
       const dto: RegisterUserDto = {
@@ -246,54 +204,57 @@ describe("RegisterUserUseCase class", () => {
 
       expect(mockPasswordService.validate).not.toHaveBeenCalled();
       expect(mockPasswordService.hash).not.toHaveBeenCalled();
-      expect(mockUserRepository.save).not.toHaveBeenCalled();
-    });
-    describe("when the password is weak", () => {
-      it("deve lançar WeakPasswordError com lista de erros", async () => {
-        const dto: RegisterUserDto = {
-          email: "novo@exemplo.com",
-          password: "123",
-          name: "Teste",
-          nickname: "teste",
-        };
-
-        const passwordErrors = [
-          {
-            code: PasswordErrorCode.MIN_LENGTH,
-            message: "Senha muito curta",
-          },
-          {
-            code: PasswordErrorCode.UPPERCASE_REQUIRED,
-            message: "Falta maiúscula",
-          },
-        ];
-
-        mockEmailService.normalize.mockReturnValue("novo@exemplo.com");
-        mockUserRepository.findByEmail.mockResolvedValue(null);
-        mockPasswordService.validate.mockReturnValue({
-          isValid: false,
-          errors: passwordErrors,
-        });
-
-        await expect(registerUserUC.execute(dto)).rejects.toThrow(
-          WeakPasswordError
-        );
-
-        try {
-          await registerUserUC.execute(dto);
-        } catch (error) {
-          if (error instanceof WeakPasswordError) {
-            expect(error.errors).toEqual(passwordErrors);
-          }
-        }
-
-        expect(mockPasswordService.hash).not.toHaveBeenCalled();
-        expect(mockUserRepository.save).not.toHaveBeenCalled();
-      });
+      expect(mockPendingRepository.save).not.toHaveBeenCalled();
+      expect(mockVerificationService.sendCode).not.toHaveBeenCalled();
     });
   });
+
+  describe("when the password is weak", () => {
+    it("deve lançar WeakPasswordError com lista de erros", async () => {
+      const dto: RegisterUserDto = {
+        email: "novo@exemplo.com",
+        password: "123",
+        name: "Teste",
+        nickname: "teste",
+      };
+
+      const passwordErrors = [
+        {
+          code: PasswordErrorCode.MIN_LENGTH,
+          message: "Senha muito curta",
+        },
+        {
+          code: PasswordErrorCode.UPPERCASE_REQUIRED,
+          message: "Falta maiúscula",
+        },
+      ];
+
+      mockEmailService.normalize.mockReturnValue("novo@exemplo.com");
+      mockUserRepository.findByEmail.mockResolvedValue(null);
+      mockPasswordService.validate.mockReturnValue({
+        isValid: false,
+        errors: passwordErrors,
+      });
+
+      await expect(registerUserUC.execute(dto)).rejects.toThrow(
+        WeakPasswordError
+      );
+
+      try {
+        await registerUserUC.execute(dto);
+      } catch (error) {
+        if (error instanceof WeakPasswordError) {
+          expect(error.errors).toEqual(passwordErrors);
+        }
+      }
+
+      expect(mockPasswordService.hash).not.toHaveBeenCalled();
+      expect(mockPendingRepository.save).not.toHaveBeenCalled();
+    });
+  });
+
   describe("execution order of methods", () => {
-    it("should execute methods in the correct order: normalize → findByEmail → validate → hash → save", async () => {
+    it("should execute methods in the correct order", async () => {
       const dto: RegisterUserDto = {
         email: "test@test.com",
         password: "SenhaForte@123",
@@ -323,15 +284,13 @@ describe("RegisterUserUseCase class", () => {
         return "hashed";
       });
 
-      mockUserRepository.save.mockImplementation(async (user) => {
+      mockPendingRepository.save.mockImplementation(async () => {
         callOrder.push("save");
-        return {
-          ...user,
-          id: 1,
-          code: user.code ?? "uuid",
-          nickname: user.nickname ?? "teste",
-          linkedin: user.linkedin ?? null,
-        } as User;
+        return {} as any;
+      });
+
+      mockVerificationService.sendCode.mockImplementation(async () => {
+        callOrder.push("sendCode");
       });
 
       await registerUserUC.execute(dto);
@@ -342,43 +301,12 @@ describe("RegisterUserUseCase class", () => {
         "validate",
         "hash",
         "save",
+        "sendCode",
       ]);
     });
   });
+
   describe("security", () => {
-    it("must never return the password in the result", async () => {
-      const dto: RegisterUserDto = {
-        email: "test@test.com",
-        password: "SenhaForte@123",
-        name: "Teste",
-        nickname: "teste",
-      };
-
-      mockEmailService.normalize.mockReturnValue("test@test.com");
-      mockUserRepository.findByEmail.mockResolvedValue(null);
-      mockPasswordService.validate.mockReturnValue({
-        isValid: true,
-        errors: [],
-      });
-      mockPasswordService.hash.mockResolvedValue("super-secret-hash");
-      mockUserRepository.save.mockResolvedValue({
-        id: 1,
-        code: "uuid-1",
-        email: "test@test.com",
-        password: "super-secret-hash",
-        name: "Teste",
-        nickname: "teste",
-        linkedin: null,
-        isConfirmed: false,
-        createdAt: new Date(),
-      } as User);
-
-      const result = await registerUserUC.execute(dto);
-
-      expect(result).not.toHaveProperty("password");
-      expect(Object.keys(result)).not.toContain("password");
-    });
-
     it("must save the password hashed, never in plain text", async () => {
       const dto: RegisterUserDto = {
         email: "test@test.com",
@@ -394,17 +322,18 @@ describe("RegisterUserUseCase class", () => {
         errors: [],
       });
       mockPasswordService.hash.mockResolvedValue("$2b$10$hashed...");
-      mockUserRepository.save.mockResolvedValue({ id: 1 } as User);
+      mockPendingRepository.save.mockResolvedValue({} as any);
+      mockVerificationService.sendCode.mockResolvedValue(undefined);
 
       await registerUserUC.execute(dto);
 
-      expect(mockUserRepository.save).toHaveBeenCalledWith(
+      expect(mockPendingRepository.save).toHaveBeenCalledWith(
         expect.objectContaining({
           password: "$2b$10$hashed...",
         })
       );
 
-      expect(mockUserRepository.save).not.toHaveBeenCalledWith(
+      expect(mockPendingRepository.save).not.toHaveBeenCalledWith(
         expect.objectContaining({
           password: "MinhaSenha@123",
         })

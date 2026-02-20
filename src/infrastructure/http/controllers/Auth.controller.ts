@@ -1,8 +1,11 @@
 import { Request, Response } from "express";
+import { ConfirmRegistrationUC } from "../../../application/use-cases/auth/ConfirmRegistration.useCase";
 import { LoginUserUC } from "../../../application/use-cases/auth/LoginUser.useCase";
 import { RegisterUserUC } from "../../../application/use-cases/auth/RegisterUser.useCase";
 import {
   EmailAlreadyInUseError,
+  InvalidVerificationCodeError,
+  PendingRegistrationNotFoundError,
   WeakPasswordError,
 } from "../../../domain/errors/auth.errors";
 import {
@@ -14,15 +17,26 @@ import {
 export class AuthController {
   constructor(
     private readonly registerUserUC: RegisterUserUC,
+    private readonly confirmRegistrationUC: ConfirmRegistrationUC,
     private readonly loginUserUC: LoginUserUC
   ) {}
 
   async register(req: Request, res: Response): Promise<void> {
     try {
-      const user = await this.registerUserUC.execute(req.body);
+      const result = await this.registerUserUC.execute(req.body);
+
+      res.status(201).json(result);
+    } catch (error) {
+      this.handleError(error, res);
+    }
+  }
+
+  async confirmRegistration(req: Request, res: Response): Promise<void> {
+    try {
+      const user = await this.confirmRegistrationUC.execute(req.body);
 
       res.status(201).json({
-        message: "Usuário criado com sucesso",
+        message: "Cadastro efetivado com sucesso! Você já pode fazer login.",
         user,
       });
     } catch (error) {
@@ -76,6 +90,16 @@ export class AuthController {
       res.status(404).json({
         error: error.message,
       });
+      return;
+    }
+
+    if (error instanceof InvalidVerificationCodeError) {
+      res.status(400).json({ error: error.message });
+      return;
+    }
+
+    if (error instanceof PendingRegistrationNotFoundError) {
+      res.status(400).json({ error: error.message });
       return;
     }
 

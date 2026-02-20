@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { ConfirmRegistrationDto } from "../../../application/dtos/auth/confirm-registration.dto";
 import { LoginUserDto } from "../../../application/dtos/auth/login.dto";
 import { RegisterUserDto } from "../../../application/dtos/auth/register.dto";
 import { authController } from "../../di/dependency-injection-auth.di";
@@ -8,6 +9,12 @@ const router = Router();
 
 router.post("/register", validateDto(RegisterUserDto), (req, res) =>
   authController.register(req, res)
+);
+
+router.post(
+  "/confirm-registration",
+  validateDto(ConfirmRegistrationDto),
+  (req, res) => authController.confirmRegistration(req, res)
 );
 
 router.post("/login", validateDto(LoginUserDto), (req, res) =>

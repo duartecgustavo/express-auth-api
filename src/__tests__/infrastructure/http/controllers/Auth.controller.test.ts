@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { AuthController } from "../../../../infrastructure/http/controllers/Auth.controller";
+import { ConfirmRegistrationUC } from "../../../../application/use-cases/auth/ConfirmRegistration.useCase";
 import { LoginUserUC } from "../../../../application/use-cases/auth/LoginUser.useCase";
 import { RegisterUserUC } from "../../../../application/use-cases/auth/RegisterUser.useCase";
 import {
@@ -16,6 +17,7 @@ import { PasswordErrorCode } from "../../../../domain/types/password.types";
 describe("AuthController", () => {
   let authController: AuthController;
   let mockRegisterUserUC: jest.Mocked<RegisterUserUC>;
+  let mockConfirmRegistrationUC: jest.Mocked<ConfirmRegistrationUC>;
   let mockLoginUserUC: jest.Mocked<LoginUserUC>;
   let mockReq: Partial<Request>;
   let mockRes: Partial<Response>;
@@ -25,6 +27,10 @@ describe("AuthController", () => {
 
   beforeEach(() => {
     mockRegisterUserUC = {
+      execute: jest.fn(),
+    } as any;
+
+    mockConfirmRegistrationUC = {
       execute: jest.fn(),
     } as any;
 
@@ -46,7 +52,11 @@ describe("AuthController", () => {
 
     consoleErrorSpy = jest.spyOn(console, "error").mockImplementation();
 
-    authController = new AuthController(mockRegisterUserUC, mockLoginUserUC);
+    authController = new AuthController(
+      mockRegisterUserUC,
+      mockConfirmRegistrationUC,
+      mockLoginUserUC
+    );
   });
 
   afterEach(() => {
@@ -56,16 +66,10 @@ describe("AuthController", () => {
   describe("register", () => {
     describe("when registration is successful", () => {
       it("should register user and return 201", async () => {
-        const mockUser = {
-          id: 1,
-          code: "user-code-123",
+        const mockResult = {
+          message:
+            "Cadastro iniciado. Verifique seu email e confirme o código para efetivar o cadastro.",
           email: "user@example.com",
-          name: "John Doe",
-          nickname: "johndoe",
-          linkedin: null,
-          isConfirmed: false,
-          createdAt: new Date(),
-          updatedAt: new Date(),
         };
 
         mockReq.body = {
@@ -75,16 +79,13 @@ describe("AuthController", () => {
           nickname: "johndoe",
         };
 
-        mockRegisterUserUC.execute.mockResolvedValue(mockUser);
+        mockRegisterUserUC.execute.mockResolvedValue(mockResult);
 
         await authController.register(mockReq as Request, mockRes as Response);
 
         expect(mockRegisterUserUC.execute).toHaveBeenCalledWith(mockReq.body);
         expect(statusMock).toHaveBeenCalledWith(201);
-        expect(jsonMock).toHaveBeenCalledWith({
-          message: "Usuário criado com sucesso",
-          user: mockUser,
-        });
+        expect(jsonMock).toHaveBeenCalledWith(mockResult);
       });
 
       it("should call registerUserUC with request body", async () => {
@@ -92,10 +93,14 @@ describe("AuthController", () => {
           email: "test@test.com",
           password: "Password@123",
           name: "Test User",
+          nickname: "testuser",
         };
 
         mockReq.body = requestBody;
-        mockRegisterUserUC.execute.mockResolvedValue({} as any);
+        mockRegisterUserUC.execute.mockResolvedValue({
+          message: "Cadastro iniciado.",
+          email: "test@test.com",
+        });
 
         await authController.register(mockReq as Request, mockRes as Response);
 
@@ -110,6 +115,7 @@ describe("AuthController", () => {
           email: "existing@example.com",
           password: "Password@123",
           name: "Test",
+          nickname: "test",
         };
 
         const error = new EmailAlreadyInUseError();

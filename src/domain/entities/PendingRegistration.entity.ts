@@ -6,12 +6,9 @@ import {
 } from "typeorm";
 
 @Entity()
-export class User {
+export class PendingRegistration {
   @PrimaryGeneratedColumn()
   id: number;
-
-  @Column({ unique: true })
-  code: string;
 
   @Column({ unique: true })
   email: string;
@@ -28,9 +25,9 @@ export class User {
   @Column({ type: "varchar", nullable: true })
   linkedin: string | null;
 
-  @Column({ default: false })
-  isConfirmed: boolean;
-
   @CreateDateColumn()
   createdAt: Date;
+
+  @Column()
+  expiresAt: Date;
 }

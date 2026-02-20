@@ -14,9 +14,16 @@ export class WeakPasswordError extends Error {
   }
 }
 
-export class UserNotFoundError extends Error {
+export class InvalidVerificationCodeError extends Error {
   constructor() {
-    super("Usuário não encontrado");
-    this.name = "UserNotFoundError";
+    super("Código de verificação inválido ou expirado");
+    this.name = "InvalidVerificationCodeError";
+  }
+}
+
+export class PendingRegistrationNotFoundError extends Error {
+  constructor() {
+    super("Cadastro pendente não encontrado ou expirado. Faça o registro novamente.");
+    this.name = "PendingRegistrationNotFoundError";
   }
 }
