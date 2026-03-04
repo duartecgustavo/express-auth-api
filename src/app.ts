@@ -20,6 +20,7 @@ app.use(
       "http://localhost:8000",
       "http://127.0.0.1:8000",
       "http://localhost:3000",
+      ...(process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(",").map((o) => o.trim()).filter(Boolean) : []),
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
