@@ -3,12 +3,25 @@ import dotenv from "dotenv";
 import express, { Request, Response } from "express";
 import helmet from "helmet";
 import "reflect-metadata";
+import { AppDataSource } from "./infrastructure/database/data-source";
 import { authRoutes } from "./infrastructure/http/routes/auth.routes";
 import { userRoutes } from "./infrastructure/http/routes/users.routes";
 
 dotenv.config();
 
 const app = express();
+
+// ===== INICIALIZAÇÃO DO BANCO (serverless/Vercel) =====
+app.use(async (_req, _res, next) => {
+  try {
+    if (!AppDataSource.isInitialized) {
+      await AppDataSource.initialize();
+    }
+  } catch (err) {
+    console.error("Database init error:", err);
+  }
+  next();
+});
 
 // ===== MIDDLEWARES DE SEGURANÇA =====
 app.use(helmet());
@@ -57,3 +70,4 @@ app.use((req: Request, res: Response) => {
 });
 
 export { app };
+export default app;
