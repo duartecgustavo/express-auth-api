@@ -9,7 +9,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "db:reset": "ts-node scripts/reset-db.ts"
+    "db:reset": "ts-node scripts/reset-db.ts",
+    "db:sync": "ts-node scripts/sync-db.ts"
   },
   "keywords": [],
   "author": "",
