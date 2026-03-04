@@ -26,15 +26,23 @@ app.use(async (_req, _res, next) => {
 // ===== MIDDLEWARES DE SEGURANÇA =====
 app.use(helmet());
 
+const corsOrigins = [
+  process.env.CORS_ORIGIN || "http://localhost:5173",
+  "http://localhost:8000",
+  "http://127.0.0.1:8000",
+  "http://localhost:3000",
+  "https://auth-terminal.vercel.app",
+  ...(process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(",").map((o) => o.trim()).filter(Boolean) : []),
+];
+
 app.use(
   cors({
-    origin: [
-      process.env.CORS_ORIGIN || "http://localhost:5173",
-      "http://localhost:8000",
-      "http://127.0.0.1:8000",
-      "http://localhost:3000",
-      ...(process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(",").map((o) => o.trim()).filter(Boolean) : []),
-    ],
+    origin: (origin, cb) => {
+      if (!origin) return cb(null, true);
+      if (corsOrigins.includes(origin)) return cb(null, true);
+      if (origin.endsWith(".vercel.app")) return cb(null, true); // preview deployments
+      cb(null, false);
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
